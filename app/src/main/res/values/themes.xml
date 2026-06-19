@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base theme; the real colors are supplied by Compose Material3 in
+         ui/theme. This just sets a sensible launch background and no action bar. -->
+    <style name="Theme.Lumi" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/lumi_bg</item>
+        <item name="android:statusBarColor">@color/lumi_bg</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>

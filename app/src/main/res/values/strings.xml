@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Lumi</string>
+    <string name="reminder_channel_name">Daily skin photo reminder</string>
+    <string name="reminder_channel_desc">A gentle nudge to take today\'s skin photo.</string>
+</resources>

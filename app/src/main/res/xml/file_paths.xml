@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Daily photos live in the app's private files dir under /photos.
+         Exposed to the camera app (write) and the share sheet (read) only
+         via temporary per-URI grants. -->
+    <files-path name="photos" path="photos/" />
+    <cache-path name="share" path="share/" />
+</paths>
