@@ -18,4 +18,5 @@ enum class Tab(val route: String, val label: String, val icon: ImageVector) {
 object Routes {
     const val SKIN_CHECK = "skincheck"
     const val SETTINGS = "settings"
+    const val CAPTURE = "capture"
 }

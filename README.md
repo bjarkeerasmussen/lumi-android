@@ -11,8 +11,9 @@ Compose, APK built in the cloud by GitHub Actions — no Android Studio needed).
 
 ## What it does
 
-- **Today** — take the day's photo, quick self-ratings (overall / redness /
-  breakouts), a note, and a daily streak.
+- **Today** — take the day's photo with an **ID-style oval face guide** (line
+  your face up inside the oval, so every day is framed the same), quick
+  self-ratings (overall / redness / breakouts), a note, and a daily streak.
 - **Progress** — photo timeline, a before/after cross-fade slider, and a trend
   chart of your ratings.
 - **Routine** — log AM/PM products and **LED light-therapy sessions** (red /

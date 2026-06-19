@@ -72,5 +72,11 @@ dependencies {
     // On-device image loading (memory-safe thumbnails of the photo timeline).
     implementation("io.coil-kt:coil-compose:2.6.0")
 
+    // In-app camera for the face-alignment capture overlay.
+    implementation("androidx.camera:camera-core:1.3.4")
+    implementation("androidx.camera:camera-camera2:1.3.4")
+    implementation("androidx.camera:camera-lifecycle:1.3.4")
+    implementation("androidx.camera:camera-view:1.3.4")
+
     debugImplementation("androidx.compose.ui:ui-tooling")
 }

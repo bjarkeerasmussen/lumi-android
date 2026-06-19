@@ -17,8 +17,9 @@ automatically:
 3. Open **Lumi**.
 
 ## 3. First use
-- Tap **Take today's photo**. Tip: same spot, same light each day gives the best
-  before/after.
+- Tap **Take today's photo**. A camera opens with an oval guide — just line
+  your face up inside the oval and tap the round shutter button. Framing your
+  face the same way each day gives the best before/after.
 - Allow the camera, and (optionally) notifications so the daily reminder works.
 - Set a reminder time in **Settings** if you like.
 

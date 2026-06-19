@@ -31,6 +31,7 @@ import com.lumi.app.data.LumiStore
 import com.lumi.app.data.Prefs
 import com.lumi.app.ui.nav.Routes
 import com.lumi.app.ui.nav.Tab
+import com.lumi.app.ui.screens.CaptureScreen
 import com.lumi.app.ui.screens.LearnScreen
 import com.lumi.app.ui.screens.ProgressScreen
 import com.lumi.app.ui.screens.RoutineScreen
@@ -112,11 +113,19 @@ private fun LumiApp(store: LumiStore, prefs: Prefs) {
                 TodayScreen(
                     store = store,
                     onOpenSkinCheck = { nav.navigate(Routes.SKIN_CHECK) },
+                    onTakePhoto = { nav.navigate(Routes.CAPTURE) },
                     requestNotifPermission = {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                             notifPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
                         }
                     }
+                )
+            }
+            composable(Routes.CAPTURE) {
+                CaptureScreen(
+                    store = store,
+                    onCaptured = { nav.popBackStack() },
+                    onCancel = { nav.popBackStack() }
                 )
             }
             composable(Tab.Progress.route) { ProgressScreen(store) }

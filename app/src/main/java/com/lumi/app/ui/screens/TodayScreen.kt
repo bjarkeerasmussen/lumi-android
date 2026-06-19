@@ -1,8 +1,5 @@
 package com.lumi.app.ui.screens
 
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -25,7 +22,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -35,7 +31,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.lumi.app.data.DayEntry
@@ -50,36 +45,21 @@ import com.lumi.app.ui.components.SectionTitle
 fun TodayScreen(
     store: LumiStore,
     onOpenSkinCheck: () -> Unit,
+    onTakePhoto: () -> Unit,
     requestNotifPermission: () -> Unit
 ) {
     val context = LocalContext.current
     val todayKey = store.todayKey()
-
-    // Recompose photo after (over)writing the same file path.
-    var photoVersion by remember { mutableIntStateOf(0) }
 
     // Read today's entry reactively from the store.
     val entry: DayEntry = store.entries.firstOrNull { it.date == todayKey } ?: DayEntry(todayKey)
     val photoFile = store.photoFileFor(todayKey)
     val hasPhoto = entry.photoFile != null && photoFile.exists()
 
-    val takePicture = rememberLauncherForActivityResult(
-        ActivityResultContracts.TakePicture()
-    ) { success ->
-        if (success) {
-            val updated = (store.entries.firstOrNull { it.date == todayKey } ?: DayEntry(todayKey))
-                .copy(photoFile = "$todayKey.jpg")
-            store.upsert(updated)
-            photoVersion++
-            requestNotifPermission()
-        }
-    }
-
+    // Open the face-alignment camera, prompting for the reminder permission too.
     fun launchCamera() {
-        val uri: Uri = FileProvider.getUriForFile(
-            context, "${context.packageName}.fileprovider", photoFile
-        )
-        takePicture.launch(uri)
+        requestNotifPermission()
+        onTakePhoto()
     }
 
     Column(
@@ -97,11 +77,12 @@ fun TodayScreen(
         // --- Photo card ---
         LumiCard {
             if (hasPhoto) {
+                val cacheKey = "today-${photoFile.lastModified()}"
                 AsyncImage(
                     model = ImageRequest.Builder(context)
                         .data(photoFile)
-                        .memoryCacheKey("today-$photoVersion")
-                        .diskCacheKey("today-$photoVersion")
+                        .memoryCacheKey(cacheKey)
+                        .diskCacheKey(cacheKey)
                         .build(),
                     contentDescription = "Today's skin photo",
                     contentScale = ContentScale.Crop,
