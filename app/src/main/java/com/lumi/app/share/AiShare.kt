@@ -51,9 +51,12 @@ object AiShare {
         if (!file.exists()) return false
         val text = prompt(hasBefore = false)
         copyPromptToClipboard(context, text)
+        // Prefer the composite that bakes the prompt into the image; fall back
+        // to the raw photo if composition fails for any reason.
+        val toShare = PromptImage.compose(listOf("" to file), text, store.shareDirectory()) ?: file
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "image/jpeg"
-            putExtra(Intent.EXTRA_STREAM, uriFor(context, file))
+            putExtra(Intent.EXTRA_STREAM, uriFor(context, toShare))
             putExtra(Intent.EXTRA_TEXT, text)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
@@ -66,14 +69,31 @@ object AiShare {
         val beforeFile = store.photoFileFor(before.date)
         val afterFile = store.photoFileFor(after.date)
         if (!beforeFile.exists() || !afterFile.exists()) return false
-        val uris = arrayListOf(uriFor(context, beforeFile), uriFor(context, afterFile))
         val text = prompt(hasBefore = true)
         copyPromptToClipboard(context, text)
-        val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
-            type = "image/jpeg"
-            putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
-            putExtra(Intent.EXTRA_TEXT, text)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        // Single composite image: earlier photo + latest photo + prompt panel.
+        val composite = PromptImage.compose(
+            listOf("Earlier — ${before.date}" to beforeFile, "Latest — ${after.date}" to afterFile),
+            text,
+            store.shareDirectory()
+        )
+        val intent = if (composite != null) {
+            Intent(Intent.ACTION_SEND).apply {
+                type = "image/jpeg"
+                putExtra(Intent.EXTRA_STREAM, uriFor(context, composite))
+                putExtra(Intent.EXTRA_TEXT, text)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+        } else {
+            Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                type = "image/jpeg"
+                putParcelableArrayListExtra(
+                    Intent.EXTRA_STREAM,
+                    arrayListOf(uriFor(context, beforeFile), uriFor(context, afterFile))
+                )
+                putExtra(Intent.EXTRA_TEXT, text)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
         }
         launch(context, intent)
         return true
