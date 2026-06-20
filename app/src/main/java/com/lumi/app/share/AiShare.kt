@@ -29,31 +29,51 @@ object AiShare {
      * and a recommendation to see a professional for anything medical.
      */
     private fun prompt(hasBefore: Boolean): String = buildString {
-        appendLine("I'm tracking my skin over time and would like a friendly, non-medical read of these photos.")
+        appendLine("Please give me a friendly, NON-medical read of my skin from this image. It was shared from my skin-tracking app, Lumi.")
         appendLine()
         if (hasBefore) {
-            appendLine("There are two photos: the first is an EARLIER photo, the second is the MOST RECENT. Please compare them and tell me what visibly changed (tone, redness, breakouts, texture, glow).")
+            appendLine("The image contains two photos: one labelled EARLIER and one labelled LATEST (the most recent). Compare them.")
         } else {
-            appendLine("Please look at this photo and describe what you notice.")
+            appendLine("The image contains one recent photo of my skin.")
         }
         appendLine()
-        appendLine("Please:")
-        appendLine("• Point out common, everyday skin patterns you can see (e.g. dryness, oiliness, clogged pores, redness, breakouts, dullness, dark marks).")
-        appendLine("• Suggest gentle, general skincare steps and ingredients that commonly help with those patterns.")
-        appendLine("• Keep it encouraging and practical.")
+        appendLine("Reply in exactly this format:")
+        appendLine("• 3 to 5 short bullet points on what you notice — tone, brightness, redness, breakouts, texture, glow — plus gentle, general skincare suggestions.")
+        if (hasBefore) {
+            appendLine("• A final line written exactly as: \"Today vs last time: X/10\" — where X (1-10) rates how the LATEST photo compares to the EARLIER one (higher = improved), followed by one short sentence on why.")
+        } else {
+            appendLine("• A final line written exactly as: \"Today: X/10\" — an overall score (1-10) for how the skin looks, followed by one short sentence on why.")
+        }
         appendLine()
-        appendLine("Important: do NOT attempt a medical diagnosis or name a medical condition. If you see anything that should be checked by a dermatologist or doctor (for example a changing mole, a spreading or painful rash, or a sore that won't heal), just tell me to see a professional rather than guessing.")
+        appendLine("Keep it encouraging and practical. Do NOT give a medical diagnosis or name a condition. If something looks like it needs a professional (a changing mole, a spreading or painful rash, a sore that won't heal), just say to see a dermatologist instead of guessing.")
     }
 
-    /** Share just today's (or a given day's) photo. Returns false if no photo. */
+    /**
+     * Share a day's photo. If an earlier photo exists, include it (labelled)
+     * so the AI can score "Today vs last time"; otherwise share just this one.
+     */
     fun shareSingle(context: Context, store: LumiStore, dateKey: String): Boolean {
         val file = store.photoFileFor(dateKey)
         if (!file.exists()) return false
-        val text = prompt(hasBefore = false)
+
+        val previous = store.entries.firstOrNull {
+            it.date < dateKey && it.photoFile != null && store.photoFileFor(it.date).exists()
+        }
+        val hasBefore = previous != null
+        val text = prompt(hasBefore = hasBefore)
         copyPromptToClipboard(context, text)
+
+        val items = if (previous != null) {
+            listOf(
+                "Earlier — ${previous.date}" to store.photoFileFor(previous.date),
+                "Latest — $dateKey" to file
+            )
+        } else {
+            listOf("" to file)
+        }
         // Prefer the composite that bakes the prompt into the image; fall back
         // to the raw photo if composition fails for any reason.
-        val toShare = PromptImage.compose(listOf("" to file), text, store.shareDirectory()) ?: file
+        val toShare = PromptImage.compose(items, text, store.shareDirectory()) ?: file
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "image/jpeg"
             putExtra(Intent.EXTRA_STREAM, uriFor(context, toShare))
