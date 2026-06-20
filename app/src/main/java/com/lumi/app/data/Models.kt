@@ -21,6 +21,31 @@ data class LedSession(
 }
 
 /**
+ * Lightweight, on-device image metrics computed from a daily photo. These are
+ * cosmetic/photographic measures only (not medical): average [brightness]
+ * (0..255), a [redness] index, and [unevenness] (luma spread — lower means more
+ * even tone). Used to generate friendly day-to-day comparisons.
+ */
+data class PhotoMetrics(
+    val brightness: Float,
+    val redness: Float,
+    val unevenness: Float
+) {
+    fun toJson(): JSONObject = JSONObject()
+        .put("brightness", brightness.toDouble())
+        .put("redness", redness.toDouble())
+        .put("unevenness", unevenness.toDouble())
+
+    companion object {
+        fun fromJson(o: JSONObject) = PhotoMetrics(
+            brightness = o.optDouble("brightness", 0.0).toFloat(),
+            redness = o.optDouble("redness", 0.0).toFloat(),
+            unevenness = o.optDouble("unevenness", 0.0).toFloat()
+        )
+    }
+}
+
+/**
  * The result of a Skin Check self-assessment.
  *
  * IMPORTANT: this is a NON-MEDICAL, cosmetic self-assessment. [patterns] are
@@ -67,7 +92,8 @@ data class DayEntry(
     var routineAm: MutableList<String> = mutableListOf(),
     var routinePm: MutableList<String> = mutableListOf(),
     var ledSessions: MutableList<LedSession> = mutableListOf(),
-    var skinCheck: SkinCheckResult? = null
+    var skinCheck: SkinCheckResult? = null,
+    var metrics: PhotoMetrics? = null
 ) {
     fun toJson(): JSONObject {
         val o = JSONObject()
@@ -83,6 +109,7 @@ data class DayEntry(
         ledSessions.forEach { led.put(it.toJson()) }
         o.put("ledSessions", led)
         o.put("skinCheck", skinCheck?.toJson() ?: JSONObject.NULL)
+        o.put("metrics", metrics?.toJson() ?: JSONObject.NULL)
         return o
     }
 
@@ -98,6 +125,7 @@ data class DayEntry(
             val ledArr = o.optJSONArray("ledSessions") ?: JSONArray()
             for (i in 0 until ledArr.length()) led.add(LedSession.fromJson(ledArr.getJSONObject(i)))
             val scObj = o.opt("skinCheck")
+            val mObj = o.opt("metrics")
             return DayEntry(
                 date = o.getString("date"),
                 photoFile = if (o.isNull("photoFile")) null else o.optString("photoFile", null),
@@ -108,7 +136,8 @@ data class DayEntry(
                 routineAm = strList("routineAm"),
                 routinePm = strList("routinePm"),
                 ledSessions = led,
-                skinCheck = if (scObj is JSONObject) SkinCheckResult.fromJson(scObj) else null
+                skinCheck = if (scObj is JSONObject) SkinCheckResult.fromJson(scObj) else null,
+                metrics = if (mObj is JSONObject) PhotoMetrics.fromJson(mObj) else null
             )
         }
     }

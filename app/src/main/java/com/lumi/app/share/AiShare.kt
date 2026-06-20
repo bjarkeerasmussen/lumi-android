@@ -1,8 +1,11 @@
 package com.lumi.app.share
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.core.content.FileProvider
 import com.lumi.app.data.DayEntry
 import com.lumi.app.data.LumiStore
@@ -46,10 +49,12 @@ object AiShare {
     fun shareSingle(context: Context, store: LumiStore, dateKey: String): Boolean {
         val file = store.photoFileFor(dateKey)
         if (!file.exists()) return false
+        val text = prompt(hasBefore = false)
+        copyPromptToClipboard(context, text)
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "image/jpeg"
             putExtra(Intent.EXTRA_STREAM, uriFor(context, file))
-            putExtra(Intent.EXTRA_TEXT, prompt(hasBefore = false))
+            putExtra(Intent.EXTRA_TEXT, text)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         launch(context, intent)
@@ -62,14 +67,35 @@ object AiShare {
         val afterFile = store.photoFileFor(after.date)
         if (!beforeFile.exists() || !afterFile.exists()) return false
         val uris = arrayListOf(uriFor(context, beforeFile), uriFor(context, afterFile))
+        val text = prompt(hasBefore = true)
+        copyPromptToClipboard(context, text)
         val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
             type = "image/jpeg"
             putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
-            putExtra(Intent.EXTRA_TEXT, prompt(hasBefore = true))
+            putExtra(Intent.EXTRA_TEXT, text)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         launch(context, intent)
         return true
+    }
+
+    /**
+     * Copies the prompt to the clipboard and tells the user, because most AI
+     * apps (ChatGPT, Gemini, Claude) accept a shared image but ignore the
+     * shared caption text — so the reliable way to include the prompt is to
+     * paste it into the chat. The EXTRA_TEXT above still covers apps that do
+     * read it.
+     */
+    private fun copyPromptToClipboard(context: Context, text: String) {
+        runCatching {
+            val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            cm.setPrimaryClip(ClipData.newPlainText("Lumi skin prompt", text))
+            Toast.makeText(
+                context,
+                "Prompt copied — paste it into the chat with your photo.",
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     private fun launch(context: Context, intent: Intent) {

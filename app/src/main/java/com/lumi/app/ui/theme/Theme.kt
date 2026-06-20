@@ -1,54 +1,50 @@
 package com.lumi.app.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-// Warm, calm "skincare" palette — soft clay/rose on a warm off-white.
-private val Clay = Color(0xFFB5715A)
-private val ClayDark = Color(0xFF8F5946)
-private val Rose = Color(0xFFE8B5A0)
-private val Sand = Color(0xFFF7F3F0)
-private val Ink = Color(0xFF2E2622)
+// Lumi uses the Nightfall "night" palette: deep indigo surfaces, periwinkle
+// accent, warm-sand secondary, soft lavender ink. Always dark, for a calm,
+// consistent look that matches the Nightfall app.
+private val Bg = Color(0xFF1C1736)
+private val Card = Color(0xFF272042)
+private val TabSurface = Color(0xFF231D42)
+private val Ink = Color(0xFFF3EEFC)
+private val Muted = Color(0xFFA79FC4)
+private val Accent = Color(0xFFB6A6F2)      // periwinkle
+private val Accent2 = Color(0xFFE8C79F)     // warm sand
+private val OnAccent = Color(0xFF1C1736)
+private val HeroB = Color(0xFF3A2B63)
 
-private val LightColors = lightColorScheme(
-    primary = Clay,
-    onPrimary = Color.White,
-    primaryContainer = Rose,
-    onPrimaryContainer = Color(0xFF4A2C20),
-    secondary = Color(0xFF7A9A86),
-    background = Sand,
+private val LumiColors = darkColorScheme(
+    primary = Accent,
+    onPrimary = OnAccent,
+    primaryContainer = HeroB,
+    onPrimaryContainer = Ink,
+    secondary = Accent2,
+    onSecondary = OnAccent,
+    secondaryContainer = Color(0xFF3A3258),
+    onSecondaryContainer = Ink,
+    background = Bg,
     onBackground = Ink,
-    surface = Color.White,
+    surface = Card,
     onSurface = Ink,
-    surfaceVariant = Color(0xFFEDE3DC),
-    onSurfaceVariant = Color(0xFF6B5E56)
-)
-
-private val DarkColors = darkColorScheme(
-    primary = Rose,
-    onPrimary = Color(0xFF3A241C),
-    primaryContainer = ClayDark,
-    onPrimaryContainer = Color.White,
-    secondary = Color(0xFF9BBBA6),
-    background = Color(0xFF1C1714),
-    onBackground = Color(0xFFF0E7E1),
-    surface = Color(0xFF26201C),
-    onSurface = Color(0xFFF0E7E1),
-    surfaceVariant = Color(0xFF3A322D),
-    onSurfaceVariant = Color(0xFFCDBFB6)
+    surfaceVariant = TabSurface,
+    onSurfaceVariant = Muted,
+    outline = Color(0xFF4A4368),
+    // Keep a legible error treatment for the Skin Check red-flag card.
+    error = Color(0xFFF2B8B5),
+    onError = Color(0xFF601410),
+    errorContainer = Color(0xFF8C1D18),
+    onErrorContainer = Color(0xFFF9DEDC)
 )
 
 @Composable
-fun LumiTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
+fun LumiTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = if (darkTheme) DarkColors else LightColors,
+        colorScheme = LumiColors,
         typography = LumiTypography,
         content = content
     )

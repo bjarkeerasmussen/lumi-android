@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.lumi.app.analysis.PhotoAnalysis
 import com.lumi.app.data.DayEntry
 import com.lumi.app.data.LumiStore
 
@@ -123,8 +124,9 @@ fun CaptureScreen(store: LumiStore, onCaptured: () -> Unit, onCancel: () -> Unit
             ContextCompat.getMainExecutor(context),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                    val metrics = runCatching { PhotoAnalysis.analyze(file) }.getOrNull()
                     val updated = (store.entryFor(todayKey) ?: DayEntry(todayKey))
-                        .copy(photoFile = "$todayKey.jpg")
+                        .copy(photoFile = "$todayKey.jpg", metrics = metrics)
                     store.upsert(updated)
                     onCaptured()
                 }

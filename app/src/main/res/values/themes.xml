@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base theme; the real colors are supplied by Compose Material3 in
-         ui/theme. This just sets a sensible launch background and no action bar. -->
-    <style name="Theme.Lumi" parent="Theme.Material3.DayNight.NoActionBar">
+    <!-- Platform no-action-bar theme (mirrors Nightfall). All real theming is
+         done in Compose; the dark window background just avoids a white flash
+         before Compose draws. -->
+    <style name="Theme.Lumi" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/lumi_bg</item>
-        <item name="android:statusBarColor">@color/lumi_bg</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

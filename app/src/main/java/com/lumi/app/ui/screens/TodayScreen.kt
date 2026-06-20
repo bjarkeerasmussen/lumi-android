@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.lumi.app.analysis.PhotoAnalysis
 import com.lumi.app.data.DayEntry
 import com.lumi.app.data.LumiStore
 import com.lumi.app.share.AiShare
@@ -55,6 +56,12 @@ fun TodayScreen(
     val entry: DayEntry = store.entries.firstOrNull { it.date == todayKey } ?: DayEntry(todayKey)
     val photoFile = store.photoFileFor(todayKey)
     val hasPhoto = entry.photoFile != null && photoFile.exists()
+
+    // Instant, complimentary read of today's photo vs. previous photos.
+    val insight = if (hasPhoto && entry.metrics != null) {
+        val prevMetrics = store.entries.firstOrNull { it.date < todayKey && it.metrics != null }?.metrics
+        PhotoAnalysis.buildInsight(entry.metrics!!, prevMetrics, store.streak())
+    } else null
 
     // Open the face-alignment camera, prompting for the reminder permission too.
     fun launchCamera() {
@@ -102,6 +109,30 @@ fun TodayScreen(
                         Icon(Icons.Filled.CameraAlt, null); Text("  Take today's photo")
                     }
                 }
+            }
+        }
+
+        // --- Instant analysis ---
+        if (insight != null) {
+            LumiCard {
+                Text(
+                    insight.headline,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                insight.lines.forEach { line ->
+                    Text(
+                        "•  $line",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 6.dp)
+                    )
+                }
+                Text(
+                    "A friendly read of your photo — not a medical assessment.",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
         }
 

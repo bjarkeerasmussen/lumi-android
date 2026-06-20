@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="lumi_bg">#FFF7F3F0</color>
-    <color name="lumi_primary">#FFB5715A</color>
-    <color name="ic_launcher_background">#FFF3E7DF</color>
+    <!-- Nightfall night palette -->
+    <color name="lumi_bg">#FF1C1736</color>
+    <color name="lumi_primary">#FFB6A6F2</color>
+    <color name="ic_launcher_background">#FF1C1736</color>
     <color name="white">#FFFFFFFF</color>
     <color name="black">#FF000000</color>
 </resources>
