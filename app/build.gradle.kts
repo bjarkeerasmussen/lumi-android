@@ -16,11 +16,23 @@ android {
         vectorDrawables { useSupportLibrary = true }
     }
 
+    signingConfigs {
+        // Stable debug key (checked in) so `adb install -r` works across CI builds
+        // without uninstalling first.
+        create("stable") {
+            storeFile = file("lumi-debug.keystore")
+            storePassword = "lumipack"
+            keyAlias = "lumi"
+            keyPassword = "lumipack"
+        }
+    }
+
     buildTypes {
         debug {
             isMinifyEnabled = false
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-debug"
+            signingConfig = signingConfigs.getByName("stable")
         }
         release {
             isMinifyEnabled = false
